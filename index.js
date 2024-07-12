@@ -1,4 +1,7 @@
 const express = require('express')
+const banco = require("./banco")
+const pessoa = require('./pessoaA')
+const carro = require('./carros')
 
 const app = express()
 app.use( express.json())
@@ -8,122 +11,104 @@ app.listen(PORTA, function(){
 console.log("Servidor iniciado na porta" + PORTA)
 })
 
-app.get("/", function(req, res){
-    res.send('<h1>Olá</>')
+banco.conexao.sync(function(){
+    console.log("Banco de dados conectado");
 })
 
-   
-    const pessoas =[
-        {id:1, nome:"Juninho", idade:47, Profissão: "Mecanico", Parentes:"Jaiminho"},
-    ]
-
-    const carros =[
-        {id:1, nome:"carro", modelo:"Fuscao", cor:"Preto", Ano:"1994", Adesivo:"Bola 8"}
-    ]
-
-app.get("/pessoas/", function(req, res){
-    res.send( pessoas )
+app.get("/pessoa/",async function(req, res) {
+    const resultado = await pessoa.pessoa.findAll()
+    res.send(resultado);
 })
 
-app.get("/carros/", function(req, res){
-    res.send( carros )
+app.get("/carros/",async function(req, res) {
+    const resultado = await carro.carro.findAll()
+    res.send(resultado);
 })
 
-app.get("/pessoas/:id", function(req,res){
-    var pessoaEncontrada = pessoas.find( function(pessoaAtual){
-        return pessoaAtual.id == parseInt( req.params.id ,  { include: { model: carros.carros } } )
-    })
-if( !pessoaEncontrada ){
-    res.status(404).send({})
-}else{
-    res.send( pessoaEncontrada )
-}
-})
-
-app.get("/carros/:id", function(req,res){
-    var CarroEncontrado = pessoas.find( function(CarroAtual){
-        return CarroAtual.id == parseInt( req.params.id)
-    })
-if( !CarroEncontrado ){
-    res.status(404).send({})
-}else{
-    res.send( CarroEncontrado )
-}
-})
-
-app.post("/pessoas/", function(req,res){
-const novaPessoa = {
-    id: pessoas.length+1,
-    nome: req.body.nome,
-    idade: req.body.idade
-}
-pessoas.push( novaPessoa )
-res.send( novaPessoa )
-})
-
-app.post("/carros/", function(req,res){
-    const novoCarro = {
-        id: carros.length+1,
-        modelo: req.body.modelo,
-        cor: req.body.cor,
-        ano: req.body.ano,
-        Adesivo: req.body.Adesivo
-    }
-    carros.push( novoCarro )
-    res.send( novoCarro )
-    })
-
-app.put("/pessoas/:id", function(req,res){
-const pessoaEncontrada = pessoas.find( function( pessoaAtual){
-    return pessoaAtual.id == parseInt( req.params.id)
-})
-if( !pessoaEncontrada ){
-    res.status(404).send({})
-}else{
-    pessoaEncontrada.nome = req.body.nome
-    pessoaEncontrada.idade = req.body.idade
-    res.send( pessoaEncontrada )
-}
-})
-
-app.delete("/pessoas/:id", function (req,res){
-    const pessoaEncontrada = pessoas.find( function( pessoaAtual){
-        return pessoaAtual.id == parseInt( req.params.id)
-})
-if( !pessoaEncontrada ){
-    res.status(404).send({})
-}else{
-    const index = pessoas.indexOf( pessoaEncontrada )
-    pessoas.splice( index, 1 )
-    res.send( {} )
-    }
-})
-
-
-app.put("/carros/:id", function(req,res){
-    const CarroEncontrado = carros.find( function( CarroAtual){
-        return CarroAtual.id == parseInt( req.params.id)
-    })
-    if( !CarroEncontrado ){
+app.get("/pessoa/:id",async function(req, res) {
+    const pessoaSelecionada = await pessoa.pessoa.findByPk(req.params.id, 
+        { include: { model: carro.carro } } 
+    )
+    if( pessoaSelecionada == null ){
         res.status(404).send({})
     }else{
-        CarroEncontrado.modelo = req.body.modelo
-        CarroEncontrado.cor = req.body.cor
-        CarroEncontrado.ano = req.body.ano
-        CarroEncontrado.Adesivo = req.body.Adesivo
-        res.send( CarroEncontrado )
-    }
-    })
-    
-    app.delete("/carros/:id", function (req,res){
-        const CarroEncontrado = pessoas.find( function( CarroAtual){
-            return CarroAtual.id == parseInt( req.params.id)
-    })
-    if( !CarroEncontrado ){
+        res.send(pessoaSelecionada);
+    } 
+})
+
+app.get("/carros/:id",async function(req, res) {
+    const carroSelecionado = await carro.carro.findByPk(req.params.id,
+        { include: {model: pessoa.pessoa } }
+    )
+    if( carroSelecionado == null ){
         res.status(404).send({})
     }else{
-        const index = carros.indexOf( CarroEncontrado )
-        carros.splice( index, 1 )
-        res.send( {} )
+        res.send(carroSelecionado);
+    } 
+})
+
+app.post("/pessoa/",async function(req,res){
+    const resultado = await pessoa.pessoa.create({
+        nome:req.body.nome
+    })
+    res.send(resultado)
+})
+
+app.post("/carros/",async function(req,res){
+    const resultado = await carro.carro.create({
+        nome:req.body.nome,
+        pessoaId:req.body.pessoaId
+    })
+    res.send(resultado)
+})
+
+app.put("/pessoaA/:id",async function(req,res){
+    const resultado = await pessoa.pessoa.update({
+        nome:req.body.nome
+    },{
+        where:{id: req.params.id}
+    })
+    if( resultado == 0){
+        res.status(404).send({})
+    }else{
+        res.send( await pessoa.pessoaa.findByPk(req.params.id))
+    }
+})
+
+app.put("/carros/",async function(req,res){
+    const resultado = await carro.carro.update({
+        nome:req.body.nome,
+        pessoaId:req.body.pessoaId
+    })
+    if( resultado == 0){
+        res.status(404).send({})
+    }else{
+        res.send( await carro.carro.findByPk(req.params.id))
+    }
+})
+
+app.delete("/pessoa/:id",async function(req,res){
+    const resultado = await pessoa.pessoa.destroy({
+        where:{
+            id:req.params.id
         }
     })
+    if( resultado == 0 ){
+        res.status(404).send({})
+    }else{
+        res.status(204).send({})
+    }
+})
+
+app.delete("/carros/:id",async function(req,res){
+    const resultado = await carro.carro.destroy({
+        where:{
+            id:req.params.id
+        }
+    })
+    if( resultado == 0 ){
+        res.status(404).send({})
+    }else{
+        res.status(204).send({})
+    }
+})
