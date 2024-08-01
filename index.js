@@ -11,6 +11,7 @@ app.listen(PORTA, function(){
 console.log("Servidor iniciado na porta" + PORTA)
 })
 
+
 banco.conexao.sync(function(){
     console.log("Banco de dados conectado");
 })
@@ -49,22 +50,32 @@ app.get("/carros/:id",async function(req, res) {
 
 app.post("/pessoa/",async function(req,res){
     const resultado = await pessoa.pessoa.create({
-        nome:req.body.nome
+        nome:req.body.nome,
+        idade:req.body.idade,
+        endereco:req.body.endereco
+        //EXEMPLOIMPORTANTE:req.body.EXEMPLOIMPORTANTE
     })
     res.send(resultado)
 })
 
 app.post("/carros/",async function(req,res){
     const resultado = await carro.carro.create({
-        nome:req.body.nome,
+        modelo:req.body.modelo,
+        ano:req.body.ano,
+        placa:req.body.placa,
+        cor:req.body.cor,
         pessoaId:req.body.pessoaId
+        
     })
     res.send(resultado)
 })
 
 app.put("/pessoaA/:id",async function(req,res){
     const resultado = await pessoa.pessoa.update({
-        nome:req.body.nome
+        nome:req.body.nome,
+        idade:req.body.idade,
+        endereco:req.body.endereco
+        //EXEMPLOIMPORTANTE:req.body.EXEMPLOIMPORTANTE
     },{
         where:{id: req.params.id}
     })
@@ -75,10 +86,15 @@ app.put("/pessoaA/:id",async function(req,res){
     }
 })
 
-app.put("/carros/",async function(req,res){
+app.put("/carros/:id",async function(req,res){
     const resultado = await carro.carro.update({
-        nome:req.body.nome,
+        modelo:req.body.modelo,
+        ano:req.body.ano,
+        placa:req.body.placa,
+        cor:req.body.cor,
         pessoaId:req.body.pessoaId
+    },{
+        where:{id: req.params.id}
     })
     if( resultado == 0){
         res.status(404).send({})
@@ -86,6 +102,7 @@ app.put("/carros/",async function(req,res){
         res.send( await carro.carro.findByPk(req.params.id))
     }
 })
+
 
 app.delete("/pessoa/:id",async function(req,res){
     const resultado = await pessoa.pessoa.destroy({

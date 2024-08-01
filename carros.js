@@ -1,7 +1,7 @@
 const sequelize = require("sequelize");
 const banco = require("./banco")
 const pessoa = require("./pessoaA");
-
+const {foreigkeys} = require("sequelize/lib/query-types");
 
 var carro = banco.conexao.define(
     "carro",
@@ -12,16 +12,21 @@ var carro = banco.conexao.define(
             autoIncrement:true
         },
         modelo:{
-            type:sequelize.STRING(45),
+            type:sequelize.STRING,
         },
         ano:{
             type:sequelize.INTEGER.UNSIGNED,
         },
         placa:{
-            type:sequelize.STRING(45),
+            type:sequelize.STRING,
         },
         cor:{
-            type:sequelize.STRING(45),
+            type:sequelize.STRING,
+        },
+        pessoaId:{
+            type:sequelize.INTEGER.UNSIGNED,
+            allowNull:false,
+            foreigKey:true
         }
 
     },
