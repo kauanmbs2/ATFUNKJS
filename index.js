@@ -2,6 +2,7 @@ const express = require('express')
 const banco = require("./banco")
 const pessoa = require('./pessoaA')
 const carro = require('./carros')
+const { where } = require('sequelize')
 
 const app = express()
 app.use( express.json())
@@ -41,6 +42,31 @@ app.get("/carros/:id",async function(req, res) {
     const carroSelecionado = await carro.carro.findByPk(req.params.id,
         { include: {model: pessoa.pessoa } }
     )
+    if( carroSelecionado == null ){
+        res.status(404).send({})
+    }else{
+        res.send(carroSelecionado);
+    } 
+})
+
+app.get("/pessoa/nome/:nome",async function(req, res) {
+    const pessoaSelecionada = await pessoa.pessoa.findAll({
+        where:{ nome: req.params.nome, } 
+
+})
+    if( pessoaSelecionada == null ){
+        res.status(404).send({})
+    }else{
+        res.send(pessoaSelecionada);
+    } 
+})
+
+app.get("/carros/modelo/:modelo",async function(req, res) {
+    const carroSelecionado = await carro.carro.findAll({
+        where:{ modelo: req.params.modelo }
+
+    })
+       
     if( carroSelecionado == null ){
         res.status(404).send({})
     }else{
