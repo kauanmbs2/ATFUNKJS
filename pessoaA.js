@@ -25,5 +25,5 @@ var pessoa = banco.conexao.define(
 
 pessoa.hasMany( carro.carro )
 carro.carro.belongsTo( pessoa )
-
+// pessoa.pessoa.belongsTo(carro)
 module.exports = {pessoa}

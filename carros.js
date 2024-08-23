@@ -1,7 +1,6 @@
 const sequelize = require("sequelize");
 const banco = require("./banco")
 const pessoa = require("./pessoaA");
-const {foreigkeys} = require("sequelize/lib/query-types");
 
 var carro = banco.conexao.define(
     "carro",
@@ -32,5 +31,8 @@ var carro = banco.conexao.define(
     },
     { timestamps: false }
 )
+
+// pessoa.hasMany( carro.carro)
+// carro.carro.belongsTo(pessoa)
 
 module.exports = {carro}

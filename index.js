@@ -70,19 +70,19 @@ app.post("/carros/",async function(req,res){
     res.send(resultado)
 })
 
-app.put("/pessoaA/:id",async function(req,res){
+app.put("/pessoa/:id",async function(req,res){
     const resultado = await pessoa.pessoa.update({
         nome:req.body.nome,
         idade:req.body.idade,
         endereco:req.body.endereco
-        //EXEMPLOIMPORTANTE:req.body.EXEMPLOIMPORTANTE
+
     },{
         where:{id: req.params.id}
     })
     if( resultado == 0){
         res.status(404).send({})
     }else{
-        res.send( await pessoa.pessoaa.findByPk(req.params.id))
+        res.send( await pessoa.pessoa.findByPk(req.params.id))
     }
 })
 
